@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
@@ -20,5 +21,14 @@ app.get('/', (req, res) => {
     res.send('<h1> Welcome to FAQ API </h1>');
 });
 
-const PORT = process.env.PORT || 5000;
+
+mongoose
+  .connect(
+    `mongodb+srv://21it3001:${process.env.MONGO_PASS}@faqs.2jioo.mongodb.net/`
+  )
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
+
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
