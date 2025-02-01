@@ -63,3 +63,84 @@ exports.createFAQ = async (req, res) => {
     res.status(500).json({ error: "Error creating FAQ" });
   }
 };
+
+exports.updateFAQ = async (req, res) => {
+  try {
+    const { faqId } = req.params;
+    const { question, answer } = req.body;
+
+    const faq = await FAQ.findById(faqId);
+    if (!faq) {
+      return res.status(404).json({ error: "FAQ not found" });
+    }
+
+    faq.question = question || faq.question;
+    faq.answer = answer || faq.answer;
+
+    const translations = faq.translations || {};
+
+    const languages = ["hi", "bn", "es"]; 
+    for (let lang of languages) {
+      if (question) {
+        translations[lang].question = await translateText(question, lang);
+      }
+      if (answer) {
+        translations[lang].answer = await translateText(answer, lang);
+      }
+    }
+
+    faq.translations = translations;
+    await faq.save();
+
+    // Invalidate cache for all languages
+    const cacheKeys = ["en", "hi", "bn", "es"].map(lang => `faqs_${lang}`);
+    for (const cacheKey of cacheKeys) {
+      await redisClient.del(cacheKey); // Remove cache 
+    }
+
+    // Update Redis
+    const faqs = await FAQ.find({});
+    const translatedFAQs = faqs.map(faq => ({
+      ...faq.toObject(),
+      question: faq.getTranslatedQuestion("en"),
+      answer: faq.getTranslatedAnswer("en"),
+    }));
+    
+    await redisClient.set(`faqs_en`, JSON.stringify(translatedFAQs), "EX", 3600);
+
+    res.status(200).json(faq);
+  } catch (error) {
+    res.status(500).json({ error: "Error updating FAQ" });
+  }
+};
+
+exports.deleteFAQ = async (req, res) => {
+  try {
+    const { faqId } = req.params;
+    const faq = await FAQ.findByIdAndDelete(faqId);
+
+    if (!faq) {
+      return res.status(404).json({ error: "FAQ not found" });
+    }
+
+    // Invalidate cache for all languages
+    const cacheKeys = ["en", "hi", "bn", "es"].map(lang => `faqs_${lang}`);
+    for (const cacheKey of cacheKeys) {
+      await redisClient.del(cacheKey); // Remove cache for all languages
+    }
+
+    // Update Redis with the remaining FAQ list after deletion
+    const faqs = await FAQ.find({});
+    const translatedFAQs = faqs.map(faq => ({
+      ...faq.toObject(),
+      question: faq.getTranslatedQuestion("en"),
+      answer: faq.getTranslatedAnswer("en"),
+    }));
+
+    await redisClient.set(`faqs_en`, JSON.stringify(translatedFAQs), "EX", 3600);
+
+    res.status(200).json({ message: "FAQ deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Error deleting FAQ" });
+  }
+};
