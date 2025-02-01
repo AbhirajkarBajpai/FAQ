@@ -1,11 +1,20 @@
-const translate = require("google-translate-api");
+const axios = require("axios");
+require("dotenv").config();
+const API_KEY = process.env.GOOGLE_TRANSLATE_API_KEY;
 
-exports.translateText = async (text, lang) => {
+exports.translateText = async (text, targetLang) => {
+  const url = `https://translation.googleapis.com/language/translate/v2?key=${API_KEY}`;
   try {
-    const result = await translate(text, { to: lang });
-    return result.text;
+    const response = await axios.post(url, {
+      q: text,
+      target: targetLang,
+    });
+    return response.data.data.translations[0].translatedText;
   } catch (error) {
-    console.log("translation Failed!");
+    console.error(
+      "Translation API Error:",
+      error.response ? error.response.data : error.message
+    );
     return text;
   }
 };
