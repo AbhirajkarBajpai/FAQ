@@ -156,7 +156,14 @@ Here are some screenshots of the frontend interface:
 ### Translation Feature
 ![S3](assets/s3.png)
 
+---
 
+## Deployment
+
+The FAQ application has been successfully deployed using Vercel for both the frontend and backend.
+
+- **Frontend Repository**: [GitHub - AbhirajkarBajpai/FAQ](https://github.com/AbhirajkarBajpai/FAQ.git)  
+- **Backend API**: [Live API - abhirajfaq-api.vercel.app](https://abhirajfaq-api.vercel.app/)  
 
 ---
 ## Contact
