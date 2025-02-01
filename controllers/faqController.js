@@ -78,15 +78,11 @@ exports.updateFAQ = async (req, res) => {
     faq.answer = answer || faq.answer;
 
     const translations = faq.translations || {};
-
     const languages = ["hi", "bn", "es"]; 
     for (let lang of languages) {
-      if (question) {
-        translations[lang].question = await translateText(question, lang);
-      }
-      if (answer) {
-        translations[lang].answer = await translateText(answer, lang);
-      }
+      const translatedQuestion = await translateText(question, lang);
+      const translatedAnswer = await translateText(answer, lang);
+      translations[lang] = { question: translatedQuestion, answer: translatedAnswer };
     }
 
     faq.translations = translations;
