@@ -5,11 +5,11 @@ services:
       - "5000:5000"
     environment:
       - PORT=5000
-      - MONGO_PASS=put_your_mongpass
-      - REDIS_PASS=put_your_redisPass
-      - REDIS_HOST=put_your_redisHostUrl
+      - MONGO_PASS=your_mongoPassword
+      - REDIS_PASS=your_redisPassword
+      - REDIS_HOST=your_redisHost
       - REDIS_PORT=18963
-      - GOOGLE_TRANSLATE_API_KEY=use_yourGoogleAPIKey
+      - GOOGLE_TRANSLATE_API_KEY=your_googleAPI
     volumes:
       - .:/app
     command: ["node", "server.js"]
