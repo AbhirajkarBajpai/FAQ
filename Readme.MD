@@ -42,7 +42,7 @@ This project is a **FAQ Management System** built using **Express.js**, **MongoD
 ### Clone the Repository
 ```sh
  git clone hhttps://github.com/AbhirajkarBajpai/FAQ.git
- cd faq-api
+ cd server
 ```
 
 ### Environment Variables
@@ -141,6 +141,21 @@ Response:
 FAQs are cached using **Redis Cloud** to enhance performance. The translation results are also cached to reduce repeated API calls.
 
 ---
+
+
+## Frontend Screenshots
+
+Here are some screenshots of the frontend interface:
+
+### Admin Page
+![S1](assets/s1.png)
+
+### FAQ Editor
+![S2](assets/s2.png)
+
+### Translation Feature
+![S3](assets/s3.png)
+
 
 
 ---
