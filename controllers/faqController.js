@@ -12,9 +12,11 @@ exports.getFAQs = async (req, res) => {
     const faqs = await FAQ.find({});
     const translatedFAQs = faqs.map(faq => ({
       ...faq.toObject(),
-      question: faq.getTranslatedQuestion(lang)
+      question: faq.getTranslatedQuestion(lang),
+      answer: faq.getTranslatedAnswer(lang),
     }));
-    //add in redis
+
+    // Add to Redis cache
     await redisClient.set(cacheKey, JSON.stringify(translatedFAQs), "EX", 3600);
     res.json(translatedFAQs);
   } catch (error) {
@@ -26,15 +28,17 @@ exports.createFAQ = async (req, res) => {
   try {
     const { question, answer } = req.body;
     const translations = {};
-    
+
     const languages = ["hi", "bn", "es"]; 
     for (let lang of languages) {
-      translations[lang] = await translateText(question, lang);
+      const translatedQuestion = await translateText(question, lang);
+      const translatedAnswer = await translateText(answer, lang);
+      translations[lang] = { question: translatedQuestion, answer: translatedAnswer };
     }
 
     const newFAQ = new FAQ({ question, answer, translations });
 
-    // Checking if FAQs are cached in Redis
+    // Check if FAQs are cached in Redis for different languages
     const cacheKeys = ["en", "hi", "bn", "es"].map(lang => `faqs_${lang}`);
 
     for (const cacheKey of cacheKeys) {
@@ -42,7 +46,11 @@ exports.createFAQ = async (req, res) => {
 
       if (cachedData) {
         const faqs = JSON.parse(cachedData);
-        faqs.push({ ...newFAQ.toObject(), question: newFAQ.getTranslatedQuestion(cacheKey.split("_")[1]) });
+        faqs.push({ 
+          ...newFAQ.toObject(), 
+          question: newFAQ.getTranslatedQuestion(cacheKey.split("_")[1]),
+          answer: newFAQ.getTranslatedAnswer(cacheKey.split("_")[1])
+        });
 
         // Update Redis with new FAQ list
         await redisClient.set(cacheKey, JSON.stringify(faqs), "EX", 3600);
@@ -50,7 +58,6 @@ exports.createFAQ = async (req, res) => {
     }
 
     await newFAQ.save();
-
     res.status(201).json(newFAQ);
   } catch (error) {
     res.status(500).json({ error: "Error creating FAQ" });
