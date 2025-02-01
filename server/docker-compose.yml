@@ -1,0 +1,15 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_PASS=put_your_mongpass
+      - REDIS_PASS=put_your_redisPass
+      - REDIS_HOST=put_your_redisHostUrl
+      - REDIS_PORT=18963
+      - GOOGLE_TRANSLATE_API_KEY=use_yourGoogleAPIKey
+    volumes:
+      - .:/app
+    command: ["node", "server.js"]

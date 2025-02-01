@@ -20,6 +20,9 @@ app.use("/api/faqs", faqRoutes);
 app.get('/', (req, res) => {
     res.send('<h1> Welcome to FAQ API </h1>');
 });
+app.get('/health', (req, res) => {
+    res.send('<h1> Every thing is Good Here! </h1>');
+});
 
 
 mongoose
