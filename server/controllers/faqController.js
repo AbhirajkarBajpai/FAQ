@@ -27,6 +27,9 @@ exports.getFAQs = async (req, res) => {
 exports.createFAQ = async (req, res) => {
   try {
     const { question, answer } = req.body;
+    if (!question?.trim() || !answer?.trim()) {
+      return res.status(400).json({ error: "Question and answer cannot be empty or just spaces." });
+    }
     const translations = {};
 
     const languages = ["hi", "bn", "es"]; 
